@@ -1,0 +1,244 @@
+import java.awt.*;
+import java.awt.event.*;
+import javax.swing.*;
+import javax.swing.border.*;
+import java.util.*;
+import java.text.*;
+
+public class GestClin extends JFrame {
+
+    private final Color roxoClaro = new Color(153, 102, 255);
+    private final Color roxoEscuro = new Color(102, 51, 204);
+
+    private JLabel lblLogin, lblSenha;
+    private JTextField txtLogin;
+    private JPasswordField txtSenha;
+    private JButton btnLogin;
+
+    private JLabel lblNomePaciente, lblData, lblHora, lblMedico;
+    private JTextField txtNomePaciente, txtData, txtHora;
+    private JComboBox<String> cbMedico;
+    private JButton btnAgendar;
+
+    private JCalendar calendar;
+
+    private JLabel lblNomePacienteProntuario;
+    private JTextArea txtProntuario;
+
+    private Map<String, String> usuarios = new HashMap<>();
+    private List<String> medicos = new ArrayList<>();
+    private Map<String, String> prontuarios = new HashMap<>();
+
+    public GestClin() {
+        setTitle("GestClin - Gerenciamento de Clínicas");
+        setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        getContentPane().setBackground(roxoClaro);
+
+        JPanel painelLogin = new JPanel(new GridLayout(4, 2, 10, 10));
+        painelLogin.setBackground(roxoClaro);
+        painelLogin.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        lblLogin = new JLabel("Login:");
+        lblLogin.setFont(new Font("Arial", Font.BOLD, 14));
+        lblLogin.setForeground(Color.WHITE);
+        painelLogin.add(lblLogin);
+
+        txtLogin = new JTextField();
+        txtLogin.setFont(new Font("Arial", Font.PLAIN, 14));
+        painelLogin.add(txtLogin);
+
+        lblSenha = new JLabel("Senha:");
+        lblSenha.setFont(new Font("Arial", Font.BOLD, 14));
+        lblSenha.setForeground(Color.WHITE);
+        painelLogin.add(lblSenha);
+
+        txtSenha = new JPasswordField();
+        txtSenha.setFont(new Font("Arial", Font.PLAIN, 14));
+        painelLogin.add(txtSenha);
+
+        btnLogin = new JButton("Entrar");
+        btnLogin.setBackground(roxoEscuro);
+        btnLogin.setForeground(Color.WHITE);
+        btnLogin.setFont(new Font("Arial", Font.BOLD, 14));
+        btnLogin.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                verificarLogin();
+            }
+        });
+        painelLogin.add(btnLogin);
+
+        painelLogin.add(new JLabel()); 
+
+        add(painelLogin);
+
+        usuarios.put("admin", "admin123");
+        medicos.add("Dr. João");
+        medicos.add("Dra. Maria");
+        prontuarios.put("Paciente A", "Histórico do Paciente A");
+        prontuarios.put("Paciente B", "Histórico do Paciente B");
+
+        setVisible(true);
+    }
+
+    private void verificarLogin() {
+        String login = txtLogin.getText();
+        String senha = new String(txtSenha.getPassword());
+
+        if (usuarios.containsKey(login) && usuarios.get(login).equals(senha)) {
+
+            exibirTelaAgendamento();
+        } else {
+
+            JOptionPane.showMessageDialog(this, "Login ou senha inválidos!", "Erro", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void exibirTelaAgendamento() {
+        getContentPane().removeAll();
+
+        JPanel painelAgendamento = new JPanel(new GridLayout(5, 2, 10, 10));
+        painelAgendamento.setBackground(roxoClaro);
+        painelAgendamento.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        lblNomePaciente = new JLabel("Nome do Paciente:");
+        lblNomePaciente.setFont(new Font("Arial", Font.BOLD, 14));
+        lblNomePaciente.setForeground(Color.WHITE);
+        painelAgendamento.add(lblNomePaciente);
+
+        txtNomePaciente = new JTextField();
+        txtNomePaciente.setFont(new Font("Arial", Font.PLAIN, 14));
+        painelAgendamento.add(txtNomePaciente);
+
+        lblData = new JLabel("Data:");
+        lblData.setFont(new Font("Arial", Font.BOLD, 14));
+        lblData.setForeground(Color.WHITE);
+        painelAgendamento.add(lblData);
+
+        txtData = new JTextField();
+        txtData.setFont(new Font("Arial", Font.PLAIN, 14));
+        painelAgendamento.add(txtData);
+
+        lblHora = new JLabel("Hora:");
+        lblHora.setFont(new Font("Arial", Font.BOLD, 14));
+        lblHora.setForeground(Color.WHITE);
+        painelAgendamento.add(lblHora);
+
+        txtHora = new JTextField();
+        txtHora.setFont(new Font("Arial", Font.PLAIN, 14));
+        painelAgendamento.add(txtHora);
+
+        lblMedico = new JLabel("Médico:");
+        lblMedico.setFont(new Font("Arial", Font.BOLD, 14));
+        lblMedico.setForeground(Color.WHITE);
+        painelAgendamento.add(lblMedico);
+
+        cbMedico = new JComboBox<>(medicos.toArray(new String[0]));
+        cbMedico.setFont(new Font("Arial", Font.PLAIN, 14));
+        painelAgendamento.add(cbMedico);
+
+        btnAgendar = new JButton("Agendar");
+        btnAgendar.setBackground(roxoEscuro);
+        btnAgendar.setForeground(Color.WHITE);
+        btnAgendar.setFont(new Font("Arial", Font.BOLD, 14));
+        btnAgendar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                agendarConsulta();
+            }
+        });
+        painelAgendamento.add(btnAgendar);
+
+        painelAgendamento.add(new JLabel());
+
+        add(painelAgendamento);
+
+        revalidate();
+        repaint();
+    }
+
+    private void agendarConsulta() {
+        String nomePaciente = txtNomePaciente.getText();
+        String data = txtData.getText();
+        String hora = txtHora.getText();
+        String medico = (String) cbMedico.getSelectedItem();
+
+        if (nomePaciente.isEmpty() || data.isEmpty() || hora.isEmpty() || medico.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Preencha todos os campos!", "Erro", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        JOptionPane.showMessageDialog(this, "Consulta agendada com sucesso!", "Sucesso", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    private void exibirTelaCalendario() {
+        getContentPane().removeAll();
+
+        JPanel painelCalendario = new JPanel(new BorderLayout());
+        painelCalendario.setBackground(roxoClaro);
+
+        calendar = new JCalendar();
+        calendar.setPreferredSize(new Dimension(300, 200));
+        painelCalendario.add(calendar, BorderLayout.CENTER);
+
+        add(painelCalendario);
+
+        revalidate();
+        repaint();
+    }
+
+    private void exibirTelaProntuario() {
+        getContentPane().removeAll();
+
+        JPanel painelProntuario = new JPanel(new BorderLayout());
+        painelProntuario.setBackground(roxoClaro);
+        painelProntuario.setBorder(new EmptyBorder(20, 20, 20, 20));
+
+        lblNomePacienteProntuario = new JLabel("Nome do Paciente:");
+        lblNomePacienteProntuario.setFont(new Font("Arial", Font.BOLD, 14));
+        lblNomePacienteProntuario.setForeground(Color.WHITE);
+        painelProntuario.add(lblNomePacienteProntuario, BorderLayout.NORTH);
+
+        txtProntuario = new JTextArea();
+        txtProntuario.setFont(new Font("Arial", Font.PLAIN, 14));
+        txtProntuario.setEditable(false); // Impede edição
+        painelProntuario.add(txtProntuario, BorderLayout.CENTER);
+
+        JButton btnVisualizar = new JButton("Visualizar Prontuário");
+        btnVisualizar.setBackground(roxoEscuro);
+        btnVisualizar.setForeground(Color.WHITE);
+        btnVisualizar.setFont(new Font("Arial", Font.BOLD, 14));
+        btnVisualizar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                visualizarProntuario();
+            }
+        });
+        painelProntuario.add(btnVisualizar, BorderLayout.SOUTH);
+
+        add(painelProntuario);
+
+        revalidate();
+        repaint();
+    }
+
+    private void visualizarProntuario() {
+        String nomePaciente = JOptionPane.showInputDialog(this, "Digite o nome do paciente:");
+
+        if (nomePaciente != null && !nomePaciente.isEmpty()) {
+            if (prontuarios.containsKey(nomePaciente)) {
+                txtProntuario.setText(prontuarios.get(nomePaciente));
+                lblNomePacienteProntuario.setText("Prontuário de " + nomePaciente + ":");
+            } else {
+                JOptionPane.showMessageDialog(this, "Prontuário não encontrado!", "Erro", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    public static void main(String[] args) {
+        new GestClin();
+    }
+}
